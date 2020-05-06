@@ -244,6 +244,7 @@ impl<'de, R: Read<'de>> Deserializer<R> {
     fn parse_whitespace(&mut self) -> Result<Option<u8>> {
         loop {
             match tri!(self.peek()) {
+                // Hack: trim double quote to allow non-strings as keys
                 Some(b' ') | Some(b'\n') | Some(b'\t') | Some(b'\r') | Some(b'"') => {
                     self.eat_char();
                 }
