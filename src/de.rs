@@ -245,7 +245,7 @@ impl<'de, R: Read<'de>> Deserializer<R> {
         loop {
             match tri!(self.peek()) {
                 // Hack: trim double quote to allow non-strings as keys
-                Some(b' ') | Some(b'\n') | Some(b'\t') | Some(b'\r') | Some(b'"') => {
+                Some(b' ') | Some(b'\n') | Some(b'\t') | Some(b'\r') => {
                     self.eat_char();
                 }
                 other => {
@@ -919,8 +919,8 @@ impl<'de, R: Read<'de>> Deserializer<R> {
 
             if frame == b'{' {
                 match tri!(self.parse_whitespace()) {
-                    Some(b'"') => self.eat_char(),
-                    Some(_) => return Err(self.peek_error(ErrorCode::KeyMustBeAString)),
+                    Some(_) => self.eat_char(),
+                    //Some(_) => return Err(self.peek_error(ErrorCode::KeyMustBeAString)),
                     None => return Err(self.peek_error(ErrorCode::EofWhileParsingObject)),
                 }
                 tri!(self.read.ignore_str());
@@ -1782,9 +1782,9 @@ impl<'de, 'a, R: Read<'de> + 'a> de::MapAccess<'de> for MapAccess<'a, R> {
         };
 
         match peek {
-            Some(b'"') => seed.deserialize(MapKey { de: &mut *self.de }).map(Some),
-            Some(b'}') => Err(self.de.peek_error(ErrorCode::TrailingComma)),
-            Some(_) => Err(self.de.peek_error(ErrorCode::KeyMustBeAString)),
+            Some(_) => seed.deserialize(MapKey { de: &mut *self.de }).map(Some),
+            // Some(b'}') => Err(self.de.peek_error(ErrorCode::TrailingComma)),
+            // Some(_) => Err(self.de.peek_error(ErrorCode::KeyMustBeAString)),
             None => Err(self.de.peek_error(ErrorCode::EofWhileParsingValue)),
         }
     }
